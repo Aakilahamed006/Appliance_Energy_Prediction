@@ -253,7 +253,7 @@ All models were evaluated on the held-out test split (chronologically partitione
 | **Linear Regression** (Engineered Features) | **27.22** | **60.00** | **3599.48** | **56.57%** | Fast, interpretable; Performs strongly with engineered lag and rolling variables |
 | **Bidirectional LSTM** (HSBUFC) | **28.57** | **66.21** | **4384.00** | **47.10%** | Captures bidirectional context with fast sequence convergence |
 | **Stacked LSTM** (2-Layer) | **28.74** | **63.94** | **4088.59** | **50.67%** | Strong sequence stability over 24-hour historical windows |
-| **Random Forest Regressor** (Top 15 Features) | **52.56** | **84.83** | **7195.83** | **13.18%** | Highlights key room sensors (`T3`, `RH_1`, `T8`), but suffers on non-stationary shifts |
+| **Random Forest Regressor** (Top 15 Features) | **42.6029** | **77.6114** | **6023.53** | **27.32%** | Highlights key room sensors (`T3`, `RH_1`, `T8`), but suffers on non-stationary shifts |
 
 > **Key Observation**: Hybrid deep learning (**CNN-LSTM**) and well-engineered linear regression with historical lag/rolling statistics achieve the highest predictive accuracy ($\sim 58.5\%$ variance explained) on 10-minute resolution energy forecasts.
 
