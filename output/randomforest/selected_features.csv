@@ -1,0 +1,16 @@
+Selected_Features
+Appliances_lag_10min
+acceleration_10min
+gradient_10min
+Hour_sin
+rolling_mean_3h
+Hour_cos
+rolling_std_3h
+Appliances_lag_30min
+rolling_std_1h
+Press_mm_hg
+rolling_mean_1h
+Appliances_lag_24h
+T4
+gradient_1h
+RH_5
