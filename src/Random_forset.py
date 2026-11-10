@@ -32,7 +32,7 @@ TEST_PATH = (
     / "test_feature_added.csv"
 )
 
-OUTPUT_DIR = BASE_DIR / "output" / "randomforest"
+OUTPUT_DIR = BASE_DIR / "model" / "randomforest"
 OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
 
 # --------------------------------------------------

@@ -400,18 +400,18 @@ model = Sequential([
     ),
 
     LSTM(
-        64,
+        128,
         activation="tanh",
         return_sequences=True
     ),
 
     Dropout(
-        0.2,
+        0.4,
         seed=SEED + 1
     ),
 
     LSTM(
-        32,
+        128,
         activation="tanh"
     ),
 
@@ -561,7 +561,7 @@ metrics_df = pd.DataFrame({
 })
 
 metrics_df.to_csv(
-    OUTPUT_DIR / "lstm_metrics.csv",
+    OUTPUT_DIR / "lstm_metrics_32.csv",
     index=False
 )
 
@@ -651,7 +651,7 @@ results = pd.DataFrame({
 })
 
 results.to_csv(
-    OUTPUT_DIR / "lstm_predictions.csv",
+    OUTPUT_DIR / "lstm_predictions_droupout_25.csv",
     index=False
 )
 

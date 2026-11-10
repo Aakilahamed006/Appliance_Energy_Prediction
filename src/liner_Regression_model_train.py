@@ -33,7 +33,7 @@ TEST_PATH = (
     / "test_feature_added.csv"
 )
 
-OUTPUT_DIR = BASE_DIR / "output" / "linearregression"
+OUTPUT_DIR = BASE_DIR / "model" / "linearregression"
 OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
 
 # --------------------------------------------------

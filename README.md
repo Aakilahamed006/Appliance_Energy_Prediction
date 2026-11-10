@@ -18,7 +18,8 @@ An end-to-end Machine Learning and Deep Learning pipeline for forecasting househ
    - [Step 6: Deep Learning Time-Series Models](#step-6-deep-learning-time-series-models)
 6. [Model Benchmark & Performance Comparison](#model-benchmark--performance-comparison)
 7. [Saved Artifacts & Outputs](#saved-artifacts--outputs)
-8. [Troubleshooting & FAQs](#troubleshooting--faqs)
+8. [Project Report](#project-report)
+9. [Troubleshooting & FAQs](#troubleshooting--faqs)
 
 ---
 
@@ -28,7 +29,7 @@ Accurate prediction of appliance energy consumption enables smart home energy op
 - **Chronological time-series data** recorded every 10 minutes over ~4.5 months.
 - **Indoor temperature & humidity monitoring** across 9 distinct rooms.
 - **On-site & nearby weather station metrics** (temperature, humidity, atmospheric pressure, wind speed, visibility, and dew point).
-- **Comparative modeling** spanning baseline linear regression, tree ensembles (Random Forest), and deep temporal architectures (LSTM, CNN-LSTM, and Bidirectional LSTM).
+- **Comparative modeling** spanning baseline linear regression, tree ensembles (Random Forest), and deep temporal architectures (Stacked LSTM and CNN-LSTM Hybrid).
 
 ---
 
@@ -69,7 +70,9 @@ Appliance_Energy_Prediction/
 │
 ├── notebooks/
 │   ├── EDA.ipynb                                    # Exploratory Data Analysis notebook
-│   └── appliance_power_consumption.png              # Historical energy trend visualization
+│   ├── appliance_power_consumption.png              # Historical energy trend visualization
+│   └── output/
+│       └── preprocessing/                           # Preprocessing boxplots and outlier summaries
 │
 ├── src/
 │   ├── __init__.py                                  # Package initialization
@@ -78,18 +81,17 @@ Appliance_Energy_Prediction/
 │   ├── feature_selection_linear_regression.py       # Correlation filtering & multicollinearity removal
 │   ├── liner_Regression_model_train.py              # Linear Regression training & residual analysis
 │   ├── Random_forset.py                             # Random Forest regressor & feature importance
-│   ├── LSTM_model_train.py                          # 2-layer stacked LSTM network
-│   ├── cnn_LSTM.py                                  # CNN-LSTM hybrid model
-│   └── bidirectional_LSTM.py                        # Bidirectional LSTM (HSBUFC architecture)
+│   ├── LSTM_model_train.py                          # 2-layer stacked LSTM network & batch tuning
+│   └── cnn_LSTM.py                                  # CNN-LSTM hybrid model
 │
 ├── models/
-│   ├── lstm/                                        # LSTM trained weights, metrics, and plots
-│   ├── cnn_lstm/                                    # CNN-LSTM trained weights, metrics, and plots
-│   └── hsbufc/                                      # Bidirectional LSTM weights, metrics, and scalers
-│
-├── output/
 │   ├── linearregression/                            # Correlation matrices, error plots, and predictions
-│   └── randomforest/                                # Feature importance charts, residuals, predictions
+│   ├── randomforest/                                # Feature importance charts, residuals, predictions
+│   ├── lstm/                                        # LSTM trained weights, batch-size metrics, and plots
+│   └── cnn_lstm/                                    # CNN-LSTM trained weights, metrics, and plots
+│
+├── reports/
+│   └── report.pdf                                   # Comprehensive research & technical report
 │
 ├── requirements.txt                                 # Core dependencies
 └── README.md                                        # Documentation and execution guide
@@ -157,9 +159,10 @@ python src/data_preprocessing.py
 ---
 
 ### Step 3: Feature Engineering
-Computes time-series lags, rolling window statistics, and cyclical trigonometric features (to prevent temporal boundary discontinuities):
+Computes time-series lags, rolling window statistics, gradients, and cyclical trigonometric features:
 - **Lags**: 10 min, 30 min, 1 hour, 3 hours, 24 hours.
 - **Rolling Stats**: 1-hour and 3-hour rolling mean, standard deviation, min, and max.
+- **Gradients & Accelerations**: Short-term dynamics (10m, 30m, 1h, 3h).
 - **Cyclic Encoding**: Sine and cosine representations of hour, minute, and day of week.
 ```bash
 python src/feature_engineering.py
@@ -188,7 +191,7 @@ Trains an Ordinary Least Squares (OLS) model with standardized features, compute
 ```bash
 python src/liner_Regression_model_train.py
 ```
-**Outputs stored in `output/linearregression/`**:
+**Outputs stored in `models/linearregression/`**:
 - `linear_regression_metrics.csv`
 - `linear_regression_predictions.csv`
 - `actual_vs_predicted.png`
@@ -200,7 +203,7 @@ Fits an ensemble of 200 decision trees, extracts Gini feature importances, selec
 ```bash
 python src/Random_forset.py
 ```
-**Outputs stored in `output/randomforest/`**:
+**Outputs stored in `models/randomforest/`**:
 - `feature_importance.png` & `feature_importance.csv`
 - `random_forest_metrics.csv`
 - `random_forest_predictions.csv`
@@ -210,14 +213,15 @@ python src/Random_forset.py
 
 ### Step 6: Deep Learning Time-Series Models
 
-#### 6.1. Stacked LSTM (2-Layer LSTM)
-Trains a 2-layer LSTM (64 and 32 hidden units) with Dropout (0.2) using sequence lengths of 144 steps (24 hours lookback):
+#### 6.1. Stacked LSTM (2-Layer LSTM with Batch Tuning)
+Trains a 2-layer LSTM (64 and 32 hidden units) with Dropout (0.2) using sequence lengths of 144 steps (24 hours lookback). Supports batch size sensitivity testing (32, 64, 128):
 ```bash
 python src/LSTM_model_train.py
 ```
 **Outputs stored in `models/lstm/`**:
 - Model: `lstm_energy_model.keras`
-- Metrics: `lstm_metrics.csv`
+- Metrics: `lstm_metrics.csv`, `lstm_metrics_32.csv`, `lstm_metrics_64.csv`, `lstm_metrics_128.csv`
+- Predictions: `lstm_predictions.csv`, `lstm_predictions_32.csv`, `lstm_predictions_64.csv`, `lstm_predictions_128.csv`
 - Plots: `training_loss.png`, `actual_vs_predicted.png`
 
 #### 6.2. CNN-LSTM Hybrid Model
@@ -228,18 +232,8 @@ python src/cnn_LSTM.py
 **Outputs stored in `models/cnn_lstm/`**:
 - Model: `cnn_lstm_energy_model.keras`
 - Metrics: `cnn_lstm_metrics.csv`
+- Predictions: `cnn_lstm_predictions.csv`
 - Plots: `training_loss.png`, `actual_vs_predicted.png`
-
-#### 6.3. Bidirectional LSTM (HSBUFC Architecture)
-Implements forward and backward information flow to capture historical context and seasonal periodicity:
-```bash
-python src/bidirectional_LSTM.py
-```
-**Outputs stored in `models/hsbufc/`**:
-- Model: `best_model.keras` & `hsbufc_model.keras`
-- Scalers: `feature_scaler.pkl`, `target_scaler.pkl`
-- Metrics: `metrics.json`
-- Plots & Histories: `training_history.csv`, `predictions.csv`
 
 ---
 
@@ -249,13 +243,13 @@ All models were evaluated on the held-out test split (chronologically partitione
 
 | Model Architecture | MAE (Wh) | RMSE (Wh) | MSE | $R^2$ Score | Key Strengths / Characteristics |
 |---|---|---|---|---|---|
-| **CNN-LSTM Hybrid** | **26.24** | **58.64** | **3438.64** | **58.51%** | **Best overall accuracy**; Combines local 1D feature extraction with temporal memory |
-| **Linear Regression** (Engineered Features) | **27.22** | **60.00** | **3599.48** | **56.57%** | Fast, interpretable; Performs strongly with engineered lag and rolling variables |
-| **Bidirectional LSTM** (HSBUFC) | **28.57** | **66.21** | **4384.00** | **47.10%** | Captures bidirectional context with fast sequence convergence |
-| **Stacked LSTM** (2-Layer) | **28.74** | **63.94** | **4088.59** | **50.67%** | Strong sequence stability over 24-hour historical windows |
-| **Random Forest Regressor** (Top 15 Features) | **42.6029** | **77.6114** | **6023.53** | **27.32%** | Highlights key room sensors (`T3`, `RH_1`, `T8`), but suffers on non-stationary shifts |
+| **CNN-LSTM Hybrid** | **26.24** | **58.64** | **3438.64** | **58.51%** | **Best overall accuracy**; Combines local 1D convolutional feature extraction with temporal memory |
+| **Linear Regression** (Engineered Features) | **27.22** | **60.00** | **3599.48** | **56.57%** | Fast and interpretable; highly competitive with lag and rolling features |
+| **Stacked LSTM** (Batch Size = 32) | **27.46** | **62.29** | **3880.66** | **53.18%** | Best performing pure LSTM configuration; captures short-range variance |
+| **Stacked LSTM** (Batch Size = 64 / Default) | **27.81** | **62.87** | **3952.63** | **52.31%** | Stable sequence convergence over 24-hour historical windows |
+| **Random Forest Regressor** | **42.60** | **77.61** | **6023.54** | **27.32%** | Captures non-linear sensor thresholds (`T3`, `RH_1`, `T8`); improved generalization |
 
-> **Key Observation**: Hybrid deep learning (**CNN-LSTM**) and well-engineered linear regression with historical lag/rolling statistics achieve the highest predictive accuracy ($\sim 58.5\%$ variance explained) on 10-minute resolution energy forecasts.
+> **Key Takeaway**: The **CNN-LSTM Hybrid** model achieves the highest accuracy ($R^2 = 58.51\%$), extracting localized temporal features via 1D convolutions before modeling sequential dependencies. Linear Regression with engineered lag/rolling features remains an exceptionally strong, lightweight alternative ($R^2 = 56.57\%$).
 
 ---
 
@@ -264,15 +258,15 @@ All models were evaluated on the held-out test split (chronologically partitione
 - **Trained Deep Learning Models**:
   - `models/cnn_lstm/cnn_lstm_energy_model.keras`
   - `models/lstm/lstm_energy_model.keras`
-  - `models/hsbufc/best_model.keras`
 - **Model Scalers**:
-  - `models/hsbufc/feature_scaler.pkl` & `target_scaler.pkl`
-  - `output/linearregression/linear_regression_scaler.pkl`
-- **Prediction Files**:
+  - `models/linearregression/linear_regression_scaler.pkl`
+  - `data/processed/deep_learning_feature_scaler.pkl`
+  - `data/processed/deep_learning_target_scaler.pkl`
+- **Predictions & Metrics**:
   - `models/cnn_lstm/cnn_lstm_predictions.csv`
-  - `models/lstm/lstm_predictions.csv`
-  - `output/linearregression/linear_regression_predictions.csv`
-  - `output/randomforest/random_forest_predictions.csv`
+  - `models/lstm/lstm_predictions_32.csv`, `64.csv`, `128.csv`
+  - `models/linearregression/linear_regression_predictions.csv`
+  - `models/randomforest/random_forest_predictions.csv`
 - **Evaluation Visualizations**:
   - Training loss and convergence curves (`training_loss.png`)
   - Actual vs. predicted time-series overlays (`actual_vs_predicted.png`)
@@ -281,10 +275,16 @@ All models were evaluated on the held-out test split (chronologically partitione
 
 ---
 
+## Project Report
+A complete research paper and technical report document is available at:
+- **`reports/report.pdf`**
+
+---
+
 ## Troubleshooting & FAQs
 
 ### 1. Headless / Server Execution (Non-GUI Terminals)
-If running on a remote server or terminal without a display, Matplotlib may show warnings on `plt.show()`. Set the non-interactive backend:
+If running in a terminal or server without display windows, Matplotlib can run headlessly by setting:
 ```powershell
 $env:MPLBACKEND="Agg"
 python src/LSTM_model_train.py
@@ -294,5 +294,4 @@ python src/LSTM_model_train.py
 Always run commands from the project root (`Appliance_Energy_Prediction`). All scripts use `pathlib.Path(__file__).resolve().parent.parent` to locate data directories reliably.
 
 ### 3. GPU vs CPU Training
-TensorFlow 2.15+ on native Windows runs on CPU by default (which takes $\approx 1$–$2$ minutes for sequence training). If NVIDIA GPU acceleration is needed, run inside **WSL2** (Windows Subsystem for Linux) with CUDA/cuDNN enabled.
-
+TensorFlow 2.15+ on native Windows runs on CPU by default. For NVIDIA GPU acceleration, run inside **WSL2** (Windows Subsystem for Linux) with CUDA and cuDNN enabled.

@@ -15,9 +15,11 @@ seaborn>=0.13.0
 scikit-learn>=1.4.0
 joblib>=1.3.0
 
-# Deep Learning Frameworks
+# Deep Learning Frameworks & Tuning
 tensorflow>=2.15.0
 keras>=3.0.0
+keras-tuner>=1.4.0
+tensorboard>=2.15.0
 
 # Interactive Notebook & Kernel Support
 ipykernel>=6.29.0
